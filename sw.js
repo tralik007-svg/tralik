@@ -1,5 +1,5 @@
-const CACHE = 'rtec-v1';
-const ASSETS = ['/', '/index.html'];
+const CACHE = 'rtec-v2';
+const ASSETS = ['/tralik/', '/tralik/index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
