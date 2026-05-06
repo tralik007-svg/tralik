@@ -648,15 +648,15 @@ function sendMessage() {
           const ticketNum = padTicket(state.ticketRTEC, 9);
           state.ticketRTEC += TICKET_INCREMENT;
           const dateTime = fmtFull(respTime);
-          botText = `IM RTEC\nBilet Nr MCT-<u>${ticketNum}</u>\n<u>${dateTime}</u>\nPret 6 MDL\nBord ${text}`;
-          msg4002Text = 'Plata cu succes!\n6 MDL achitati catre Regia \nTransport Electric (RTEC)';
+          botText = `IM RTEC\nBilet Nr MCT-<u>${ticketNum}</u>\n<u>${dateTime}</u>\nPret 7 MDL\nBord ${text}`;
+          msg4002Text = 'Plata cu succes!\n7 MDL achitati catre Regia \nTransport Electric (RTEC)';
         } else {
           // PUA билет
           const ticketNum = padTicket(state.ticketPUA, 9);
           state.ticketPUA += TICKET_INCREMENT;
           const dateTime = fmtFull(respTime);
-          botText = `IM PUA\nBilet Nr MCA-<u>${ticketNum}</u>\n<u>${dateTime}</u>\nPret 6 MDL\nBord ${text}`;
-          msg4002Text = 'Plata cu succes!\n6 MDL achitati catre Parcul Urban\nde Autobuze (PUA).';
+          botText = `IM PUA\nBilet Nr MCA-<u>${ticketNum}</u>\n<u>${dateTime}</u>\nPret 7 MDL\nBord ${text}`;
+          msg4002Text = 'Plata cu succes!\n7 MDL achitati catre Parcul Urban\nde Autobuze (PUA).';
         }
 
         const botMsg = { id: 'b' + Date.now(), text: botText, from: 'them', time: respTime, isHTML: true };
@@ -731,7 +731,7 @@ function sendMessage() {
           state.ticket7000 += TICKET_INCREMENT;
           const dateTime = fmtFull(respTime);
 
-          const botText = `Electronnyi bilet no. <u>${ticketNum}</u>\n  Cislo <u>${dateTime}</u>\n  Deystvitelen 1 chas\n  Tsena 6 MDL\n  Bortovoi nomer ${text}`;
+          const botText = `Electronnyi bilet no. <u>${ticketNum}</u>\n  Cislo <u>${dateTime}</u>\n  Deystvitelen 1 chas\n  Tsena 7 MDL\n  Bortovoi nomer ${text}`;
           const msg2 = {
             id: 'b2' + Date.now(),
             text: botText,
@@ -943,9 +943,15 @@ async function checkSubscription() {
       body: JSON.stringify({ device_id: deviceId })
     });
     const d = await r.json();
-    if (!d.active && !d.trial) showSubscription();
+    // browser_ IDs (iOS/web) не получают триал — только оплаченная подписка
+    if (deviceId.startsWith('browser_')) {
+      if (!d.active) showSubscription();
+    } else {
+      if (!d.active && !d.trial) showSubscription();
+    }
   } catch(e) {
-    setTimeout(checkSubscription, 60000);
+    // При ошибке сети — блокируем доступ, нельзя обойти отключив интернет
+    showSubscription();
   }
 }
 // ════════════════════════════════════════════════════════════
