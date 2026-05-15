@@ -1,4 +1,4 @@
-const CACHE = 'rtec-v2';
+const CACHE = 'rtec-v3';
 const ASSETS = ['/tralik/', '/tralik/index.html'];
 
 self.addEventListener('install', e => {
