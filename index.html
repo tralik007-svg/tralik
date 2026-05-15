@@ -211,9 +211,46 @@
   }
   .success-title { font-size: 22px; font-weight: 700; color: #F1F1F1; }
   .success-sub { font-size: 15px; color: #9E9E9E; text-align: center; }
+
+  /* Update overlay */
+  #update-overlay {
+    position: fixed; inset: 0; z-index: 10001;
+    background: #111;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px;
+    padding: 32px 24px;
+  }
+  #update-overlay.hidden { display: none; }
+  .update-icon {
+    width: 80px; height: 80px; border-radius: 24px;
+    background: linear-gradient(135deg, #1A73E8, #1557B0);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 32px rgba(26,115,232,0.4);
+  }
+  .update-title { font-size: 22px; font-weight: 700; color: #F1F1F1; text-align: center; }
+  .update-sub { font-size: 15px; color: #9E9E9E; text-align: center; line-height: 1.6; }
+  .update-btn {
+    margin-top: 8px; padding: 14px 32px; border: none; border-radius: 12px;
+    background: linear-gradient(135deg, #229ED9, #1a7fad);
+    color: white; font-size: 16px; font-weight: 700;
+    cursor: pointer; font-family: 'Roboto', sans-serif;
+  }
 </style>
 </head>
 <body>
+
+<!-- Update Overlay -->
+<div id="update-overlay" class="hidden">
+  <div class="update-icon">
+    <svg viewBox="0 0 24 24" fill="white" width="40" height="40"><path d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1-2.73 2.71-2.73 7.08 0 9.79 2.73 2.71 7.15 2.71 9.88 0 1.36-1.35 2.04-3.11 2.04-4.89h2c0 1.98-.77 3.96-2.29 5.48-3.18 3.15-8.34 3.15-11.52 0-3.17-3.14-3.17-8.23 0-11.37 3.18-3.14 8.34-3.14 11.52 0L21 3v7.12zM12.5 8v4.25l3.5 2.08-.72 1.21L11 13V8h1.5z"/></svg>
+  </div>
+  <div class="update-title">Требуется обновление</div>
+  <div class="update-sub">Доступна новая версия приложения.<br>Пожалуйста, скачайте обновление.</div>
+  <button class="update-btn" onclick="window.open('https://t.me/FreeTralik_bot', '_blank')">
+    📲 Обновить в @FreeTralik_bot
+  </button>
+  <div style="font-size:13px;color:#444;text-align:center;">Откройте бота и нажмите /download</div>
+</div>
 
 <!-- Subscription Overlay -->
 <div id="sub-overlay" class="hidden">
@@ -789,6 +826,7 @@ sendBtn.addEventListener('click', sendMessage);
 
 // ═══ SUBSCRIPTION SYSTEM ═══════════════════════════════════
 const API_URL = 'https://subscriptionserver-production.up.railway.app';
+const APP_VERSION = 3;
 let selectedPlan = '1_month';
 let deviceId = null;
 let paypalRendered = false;
@@ -809,6 +847,10 @@ function selectPlan(plan) {
 function showSubscription() {
   document.getElementById('sub-overlay').classList.remove('hidden');
   if (!paypalRendered) { initPayPalButton(); paypalRendered = true; }
+}
+
+function showUpdateScreen() {
+  document.getElementById('update-overlay').classList.remove('hidden');
 }
 
 function hideSubscription() {
@@ -940,9 +982,11 @@ async function checkSubscription() {
     const r = await fetch(API_URL + '/api/check-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ device_id: deviceId })
+      body: JSON.stringify({ device_id: deviceId, version: APP_VERSION })
     });
     const d = await r.json();
+    // Старая версия — показываем экран обновления, не экран оплаты
+    if (d.force_update) { showUpdateScreen(); return; }
     // browser_ IDs (iOS/web) не получают триал — только оплаченная подписка
     if (deviceId.startsWith('browser_')) {
       if (!d.active) showSubscription();
